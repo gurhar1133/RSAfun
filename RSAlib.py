@@ -132,22 +132,6 @@ def brute_semi(n):
             return num
     return False
 
-def break_with_semi_brute(n, e, cipher_text):
-    # essentially the same as break with light
-    # uses brute semi to get factor of n
-    p = brute_semi(n)
-    if p != False:
-        q = n/p
-        q = int(q)
-        print("p: ", p)
-        print("q: ", q)
-        # uses p and q to obtain the privte key
-        key_cracker = Find_Private_Key_d(e, p, q)
-        #then decodes
-        decoded = Decode(n, key_cracker, cipher_text)
-        return decoded
-    else:
-        print("factor not found") 
 
 def fermat_factor(n):
     # sources i used for this one
@@ -214,6 +198,8 @@ def break_with_pollards(n, e, cipher_text):
 
     
 def break_with_fermat(n, e, cipher_text):
+    # essentially the same as break with pollards rho
+    # uses fermat factorization  to get factor of n
     p = fermat_factor(n)
     if p != None:
         q = n/p
@@ -228,7 +214,7 @@ def break_with_fermat(n, e, cipher_text):
 
 
 def break_with_semi_brute(n, e, cipher_text):
-    # essentially the same as break with light
+    # essentially the same as break with pollards rho
     # uses brute semi to get factor of n
     p = brute_semi(n)
     if p != False:
