@@ -169,20 +169,20 @@ def fermat_factor(n):
     print("factor not found")
 
 
-def rand_f(x, n):
+def rand_f(x):
     # this is a helper function for pollard's rho
-    return FME(x, 2, n)
+    # it returns value of a function that is useful 
+    # for random number generation
+    # in Pollard's Rho
+    return (x**2 + random.randint(2, 2000))
 
 def pollards_factor(n):
     #A pollards rho alorithm
-    random.seed(0)
-    a = random.randrange(2,1000000)
-    b = a
-    c = random.randrange(2,1000000)
+    a = random.randint(2,10)
+    b = random.randint(2,10)
     while a != b:
-        a = (rand_f(a, n) + c ) % n
-        b = (rand_f(rand_f(b, n),n) + c ) % n
-        b = (rand_f(rand_f(b, n), n) + c ) % n
+        a = rand_f(a) % n
+        b = rand_f(rand_f(b)) % n
         # using random seeds in a and b
         # as well as the rand_f function
         # we then use the birthday paradox 
@@ -209,8 +209,8 @@ def break_with_pollards(n, e, cipher_text):
         decoded = Decode(n, key_cracker, cipher_text)
         return decoded
     else:
-        #print("factor not found reattempting")
-        break_with_pollards(n, e, cipher_text)
+        print("factor not found")
+        
 
     
 def break_with_fermat(n, e, cipher_text):
