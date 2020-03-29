@@ -1,7 +1,9 @@
 # Library for RSA encryption, decryption and a Pollard's Rho
 # factorization function for cracking codes
-
 import random
+import math
+
+# BASIC RSA TOOLSET
 def Convert_Text(_string):
     #Returns a list of ascii numbers associated with 
      #   each char 
@@ -106,16 +108,81 @@ def Decode(n, d, cipher_text):
     message = Convert_Num(message_list)
     return message
 
-def rand_f(x):
-    return (x**2 + random.randint(2, 2000))
+
+# FACTORING FUNCTIONS
+
+def is_not_div(n):
+    divs = [2, 3, 5, 7, 11, 13, 17, 19, 
+    23, 29, 31, 37, 41, 43, 47, 53, 59, 
+    61, 67, 71, 73, 79, 83, 89, 97]
+    # checks divisibility against each number in divs
+    for num in divs:
+        if n % num == 0:
+            return False
+    return True
+
+def brute_semi(n):
+    #skips 2
+    if n % 2 == 0:
+        return 2
+    # starting at 3 and up to root(n) skipping every other
+    # number (ie. only checking odds)
+    for num in list(range(3,int(n**(1/2)) + 1,2)):
+        if n % num == 0:
+            return num
+    return False
+
+def break_with_semi_brute(n, e, cipher_text):
+    # essentially the same as break with light
+    # uses brute semi to get factor of n
+    p = brute_semi(n)
+    if p != False:
+        q = n/p
+        q = int(q)
+        print("p: ", p)
+        print("q: ", q)
+        # uses p and q to obtain the privte key
+        key_cracker = Find_Private_Key_d(e, p, q)
+        #then decodes
+        decoded = Decode(n, key_cracker, cipher_text)
+        return decoded
+    else:
+        print("factor not found") 
+
+def fermat_factor(n):
+    # sources i used for this one
+    # https://medium.com/coinmonks/integer-factorization-defining-the-limits-of-rsa-cracking-71fc0675bc0e
+    # geeksforgeeks.org/fermats-factorization-method/
+    # basic idea here is that a product of primes n = pq
+    # can be expressed as n = (x-y)(x+y) = x^2 - y^2
+    # so if we keep on testing x values so see if they fit
+    # the formula we can return a factor of n
+    x = 0
+    while x < n:
+        #looping through potential x values
+        y_squared = n + x*x
+        y = int(math.sqrt(y_squared))
+        # checking that the formula satisfied
+        if y*y == int(y_squared):
+            return y - x
+        x += 1
+    print("factor not found")
+
+
+def rand_f(x, n):
+    # this is a helper function for pollard's rho
+    return FME(x, 2, n)
 
 def pollards_factor(n):
     #A pollards rho alorithm
-    a = random.randint(2,10)
-    b = random.randint(2,10)
+    random.seed(0)
+    a = random.randrange(2,1000000)
+    b = a
+    c = random.randrange(2,1000000)
     while a != b:
-        a = rand_f(a) % n
-        b = rand_f(rand_f(b)) % n
+        a = (rand_f(a, n) + c ) % n
+        b = (rand_f(rand_f(b, n),n) + c ) % n
+        b = (rand_f(rand_f(b, n), n) + c ) % n
         # using random seeds in a and b
         # as well as the rand_f function
         # we then use the birthday paradox 
@@ -124,10 +191,13 @@ def pollards_factor(n):
         gcd = Euclidean_Alg(abs(b - a), n)[0]
         if gcd > 1:
             return gcd
-        
+
+
+# CODE BREAKING FUNCIONS:
+    
 def break_with_pollards(n, e, cipher_text):
     p = pollards_factor(n)
-    if p != False:
+    if p != None:
         q = n/p
         q = int(q)
         print("p: ", p)
@@ -139,7 +209,37 @@ def break_with_pollards(n, e, cipher_text):
         decoded = Decode(n, key_cracker, cipher_text)
         return decoded
     else:
-        print("factor not found")
-
+        #print("factor not found reattempting")
+        break_with_pollards(n, e, cipher_text)
 
     
+def break_with_fermat(n, e, cipher_text):
+    p = fermat_factor(n)
+    if p != None:
+        q = n/p
+        q = int(q)
+        print("p: ", p)
+        print("q: ", q)
+        key_cracker = Find_Private_Key_d(e, p, q)
+        decoded = Decode(n, key_cracker, cipher_text)
+        return decoded
+    else:
+        print('error')
+
+
+def break_with_semi_brute(n, e, cipher_text):
+    # essentially the same as break with light
+    # uses brute semi to get factor of n
+    p = brute_semi(n)
+    if p != False:
+        q = n/p
+        q = int(q)
+        print("p: ", p)
+        print("q: ", q)
+        # uses p and q to obtain the privte key
+        key_cracker = Find_Private_Key_d(e, p, q)
+        #then decodes
+        decoded = Decode(n, key_cracker, cipher_text)
+        return decoded
+    else:
+        print("factor not found") 

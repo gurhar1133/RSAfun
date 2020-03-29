@@ -2,8 +2,9 @@ import random
 from RSAlib import *
 
 def main():
-    # a list of some primes. Yes a small sample, but more for demonstration
-    # may use larger list of primes found later in this project
+    # a list of some primes. Yes a small sample,
+    #  but more for demonstration
+    
     primes = [10000019,10000079,10000103,10000121,10000139,10000141,10000169,10000189]
     
     print('Welcome to main menu:\n')
@@ -91,9 +92,24 @@ def main():
             for num in encrypted:
                 e_list.append(int(num))
 
-            decoded = break_with_pollards(n, e, e_list)
-            print("Your decoded message:\n")
-            print(decoded)
+            subans = input("""
+                Which factorization method?
+                a) Brute
+                b) Pollards Rho
+                c) Fermat Factorization
+                ?""")
+            if subans == "a":
+                decoded = break_with_semi_brute(n,e,e_list)
+                print("Your decoded message:\n")
+                print(decoded)
+            elif subans == "b":
+                decoded = break_with_pollards(n, e, e_list)
+                print("Your decoded message:\n")
+                print(decoded)
+            elif subans == "c":
+                decoded = break_with_fermat(n, e, e_list)
+                print("Your decoded message:\n")
+                print(decoded)
 
         elif ans == "quit":
             print("bye bye")
